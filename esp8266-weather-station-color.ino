@@ -89,7 +89,7 @@ void setup() {
   tft.setFont(&ArialRoundedMTBold_14);
   ui.setTextColor(ILI9341_ORANGE, ILI9341_BLACK);
   ui.setTextAlignment(CENTER);
-  ui.drawString(120, 160, "Connecting to WiFi");
+  ui.drawString(120, 150, "Connecting to WiFi");
 
     //WiFiManager
   //Local intialization. Once its business is done, there is no need to keep it around
@@ -111,7 +111,7 @@ void setup() {
   ArduinoOTA.setHostname((const char *)hostname.c_str());
   ArduinoOTA.begin();
   SPIFFS.begin();
-  
+
   //Uncomment if you want to update all internet resources
   //SPIFFS.format();
 
@@ -159,12 +159,12 @@ void downloadCallback(String filename, int16_t bytesDownloaded, int16_t bytesTot
 
   int percentage = 100 * bytesDownloaded / bytesTotal;
   if (percentage == 0) {
-    ui.drawString(120, 160, filename);
+    ui.drawString(120, 140, filename);
   }
   if (percentage % 5 == 0) {
     ui.setTextAlignment(CENTER);
     ui.setTextColor(ILI9341_ORANGE, ILI9341_BLACK);
-    //ui.drawString(120, 160, String(percentage) + "%");
+    ui.drawString(120, 158, String(percentage) + "%");
     ui.drawProgressBar(10, 165, 240 - 20, 15, percentage, ILI9341_WHITE, ILI9341_BLUE);
   }
 
@@ -219,18 +219,19 @@ void drawProgress(uint8_t percentage, String text) {
   ui.setTextAlignment(CENTER);
   ui.setTextColor(ILI9341_ORANGE, ILI9341_BLACK);
   tft.fillRect(0, 140, 240, 45, ILI9341_BLACK);
-  ui.drawString(120, 160, text);
+  ui.drawString(120, 150, text);
   ui.drawProgressBar(10, 165, 240 - 20, 15, percentage, ILI9341_WHITE, ILI9341_BLUE);
 }
 
 // draws the clock
 void drawTime() {
   ui.setTextAlignment(CENTER);
-  ui.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+  ui.setTextColor(ILI9341_OLIVE, ILI9341_BLACK);
   tft.setFont(&ArialRoundedMTBold_14);
   String date = wunderground.getDate();
   ui.drawString(120, 20, date);
-  
+
+  ui.setTextColor(ILI9341_RED, ILI9341_BLACK);
   tft.setFont(&ArialRoundedMTBold_36);
   String time = timeClient.getHours() + ":" + timeClient.getMinutes();
   ui.drawString(120, 56, time);
@@ -242,10 +243,10 @@ void drawCurrentWeather() {
   // Weather Icon
   String weatherIcon = getMeteoconIcon(wunderground.getTodayIcon());
   ui.drawBmp(weatherIcon + ".bmp", 0, 55);
-  
+
   // Weather Text
   tft.setFont(&ArialRoundedMTBold_14);
-  ui.setTextColor(ILI9341_ORANGE, ILI9341_BLACK);
+  ui.setTextColor(ILI9341_CYAN, ILI9341_BLACK);
   ui.setTextAlignment(RIGHT);
   ui.drawString(220, 90, wunderground.getWeatherText());
 
@@ -272,42 +273,42 @@ void drawForecast() {
 
 // helper for the forecast columns
 void drawForecastDetail(uint16_t x, uint16_t y, uint8_t dayIndex) {
-  ui.setTextColor(ILI9341_ORANGE, ILI9341_BLACK);
+  ui.setTextColor(ILI9341_BLUE, ILI9341_BLACK);
   tft.setFont(&ArialRoundedMTBold_14);
   ui.setTextAlignment(CENTER);
   String day = wunderground.getForecastTitle(dayIndex).substring(0, 3);
   day.toUpperCase();
   ui.drawString(x + 25, y, day);
 
-  ui.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+  ui.setTextColor(ILI9341_GREEN, ILI9341_BLACK);
   ui.drawString(x + 25, y + 14, wunderground.getForecastLowTemp(dayIndex) + "|" + wunderground.getForecastHighTemp(dayIndex));
-  
+
   String weatherIcon = getMeteoconIcon(wunderground.getForecastIcon(dayIndex));
   ui.drawBmp("/mini/" + weatherIcon + ".bmp", x, y + 15);
-    
+
 }
 
 // draw moonphase and sunrise/set and moonrise/set
 void drawAstronomy() {
   int moonAgeImage = 24 * wunderground.getMoonAge().toInt() / 30.0;
   ui.drawBmp("/moon" + String(moonAgeImage) + ".bmp", 120 - 30, 255);
-  
+
   ui.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
-  tft.setFont(&ArialRoundedMTBold_14);  
+  tft.setFont(&ArialRoundedMTBold_14);
   ui.setTextAlignment(LEFT);
   ui.setTextColor(ILI9341_ORANGE, ILI9341_BLACK);
   ui.drawString(20, 270, "Sun");
-  ui.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+  ui.setTextColor(ILI9341_MAGENTA, ILI9341_BLACK);
   ui.drawString(20, 285, wunderground.getSunriseTime());
   ui.drawString(20, 300, wunderground.getSunsetTime());
 
   ui.setTextAlignment(RIGHT);
   ui.setTextColor(ILI9341_ORANGE, ILI9341_BLACK);
   ui.drawString(220, 270, "Moon");
-  ui.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+  ui.setTextColor(ILI9341_MAGENTA, ILI9341_BLACK);
   ui.drawString(220, 285, wunderground.getMoonriseTime());
   ui.drawString(220, 300, wunderground.getMoonsetTime());
-  
+
 }
 
 // Helper function, should be part of the weather station library and should disappear soon
@@ -331,13 +332,12 @@ String getMeteoconIcon(String iconText) {
   if (iconText == "W") return "snow";
   if (iconText == "B") return "sunny";
   if (iconText == "0") return "tstorms";
-  
+
 
   return "unknown";
 }
 
 // if you want separators, uncomment the tft-line
 void drawSeparator(uint16_t y) {
-   //tft.drawFastHLine(10, y, 240 - 2 * 10, 0x4228);
+   tft.drawFastHLine(10, y, 240 - 2 * 10, 0x4228);
 }
-
